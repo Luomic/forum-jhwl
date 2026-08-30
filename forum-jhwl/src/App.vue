@@ -9,7 +9,13 @@ import 'mdui/components/button-icon.js'
 import 'mdui/components/fab.js'
 import 'mdui/components/top-app-bar.js';
 import 'mdui/components/top-app-bar-title.js';
+import 'mdui/components/text-field.js';
 import Post from './components/Post.vue'
+
+function openDialog() {
+  const dialog = document.querySelector(".example-header");
+  dialog.open = true;
+}
 </script>
 
 <template>
@@ -22,30 +28,33 @@ import Post from './components/Post.vue'
 
       <mdui-top-app-bar class="mobile-topbar" variant="center-aligned">
         <mdui-top-app-bar-title>精弘论坛</mdui-top-app-bar-title>
+        <mdui-button-icon icon="search"></mdui-button-icon>
       </mdui-top-app-bar>
       <mdui-navigation-rail class="desktop-rail" value="post" mini>
 
-        
+
         <mdui-fab lowered icon="search" slot="top" class="edit-post"></mdui-fab>
-        <mdui-fab lowered icon="edit" slot="bottom" class="edit-post" style="margin-bottom: 20px;"></mdui-fab>
+        <mdui-fab lowered icon="edit" slot="bottom" class="edit-post" style="margin-bottom: 20px;" @click="openDialog"></mdui-fab>
         <!-- 暗色模式 -->
         <mdui-button-icon icon="dark_mode--outlined" slot="bottom" class="dark-mode"></mdui-button-icon>
-        
-        
-        <mdui-navigation-rail-item icon="inbox--outlined" active-icon="inbox" value="post" :active="$route.path === '/'" @click="$router.push('/')">
+
+
+        <mdui-navigation-rail-item icon="inbox--outlined" active-icon="inbox" value="post" :active="$route.path === '/'"
+          @click="$router.push('/')">
           帖子
         </mdui-navigation-rail-item>
 
         <div class="mdui-divider" style="margin: 8px 0;"></div>
 
-        <mdui-navigation-rail-item icon="account_circle--outlined" active-icon="account_circle" value="account" :active="$route.path === '/accountMsg'" @click="$router.push('/accountMsg')">
+        <mdui-navigation-rail-item icon="account_circle--outlined" active-icon="account_circle" value="account"
+          :active="$route.path === '/accountMsg'" @click="$router.push('/accountMsg')">
           个人资料
         </mdui-navigation-rail-item>
 
       </mdui-navigation-rail>
 
       <mdui-layout-main class="content">
-        <router-view ></router-view>
+        <router-view></router-view>
       </mdui-layout-main>
 
     </mdui-layout>
@@ -54,15 +63,33 @@ import Post from './components/Post.vue'
 
 
     <mdui-navigation-bar class="mobile-nav" value="post">
-      <mdui-navigation-bar-item icon="inbox--outlined" active-icon="inbox" value="post">
+      <mdui-navigation-bar-item icon="inbox--outlined" active-icon="inbox" value="post" :active="$route.path === '/'"
+        @click="$router.push('/')">
         帖子
       </mdui-navigation-bar-item>
 
-      <mdui-navigation-bar-item icon="account_circle--outlined" active-icon="account_circle" value="account">
+      <mdui-navigation-bar-item icon="account_circle--outlined" active-icon="account_circle" value="account"
+        :active="$route.path === '/accountMsg'" @click="$router.push('/accountMsg')">
         个人资料
       </mdui-navigation-bar-item>
     </mdui-navigation-bar>
 
+
+
+
+
+    <!-- 引用自mdui的弹窗 -->
+    <mdui-dialog close-on-overlay-click stacked-actions class="example-header">
+      <mdui-top-app-bar slot="header">
+        <mdui-top-app-bar-title style="margin-left: 18px;">搜索</mdui-top-app-bar-title>
+        <mdui-button variant="text">确认</mdui-button>
+      </mdui-top-app-bar>
+      <div style="height: 120px;" >
+        <mdui-text-field variant="outlined" label="请输入搜索内容"></mdui-text-field>
+        
+      
+      </div>
+    </mdui-dialog>
   </div>
 </template>
 
@@ -83,7 +110,8 @@ body,
 }
 
 .app {
-  width: 100vw;
+  width: 100%;
+  min-width: 0;
   height: 100%;
   overflow: hidden;
 
@@ -91,12 +119,14 @@ body,
 }
 
 .desktop-rail {
-  
+
   --mdui-color-surface: var(--mdui-color-surface-container-high);
 }
+
 .dark-mode {
   margin-bottom: 10px;
 }
+
 .edit-post {
   margin-top: 10px;
 }
@@ -147,14 +177,11 @@ body,
     bottom: 0;
     z-index: 100;
   }
+
   .mobile-topbar {
-    display: block;
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    z-index: 100;
+    display: flex;
   }
+
   .mobile-fab {
     display: block;
     position: fixed;
