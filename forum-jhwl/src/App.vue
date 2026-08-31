@@ -155,7 +155,7 @@ body,
 @media (max-width: 600px) {
 
   .app {
-    display: block;
+    display: flex;
     position: relative;
   }
 

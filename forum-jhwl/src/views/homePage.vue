@@ -3,6 +3,20 @@ import 'mdui/components/card.js';
 </script>
 <template>
   <div class="home-titlecontainer">
+    <mdui-card class="head-line">
+      <div class="head-title">
+        <h1>Welcome To Test Forum Title</h1>
+      </div>
+      
+
+    </mdui-card>
+    <mdui-card class="head-line">
+      <div class="head-title">
+        <h1>Wooooooo</h1>
+      </div>
+      
+
+    </mdui-card>
     <mdui-card v-for="n in 9" :key="n" variant="elevated" class="home-card"></mdui-card>
   </div>
 </template>
@@ -20,5 +34,12 @@ import 'mdui/components/card.js';
   .home-title {
     font-size: 48px;
     font-weight: bold;
+  }
+  .head-line{
+    width: 100%;
+    height: 200px;
+  }
+  .head-title{
+    text-align: center;
   }
 </style>
