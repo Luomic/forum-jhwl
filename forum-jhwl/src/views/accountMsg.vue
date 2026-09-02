@@ -10,7 +10,7 @@ import axios from 'axios';
 
 
 const isShowLog = ref(true); // 这是登录状态
-const role = ref(localStorage.getItem('role') || ''); // 获取用户角色
+const role = ref(''); // 获取用户角色
 const name = ref('');
 
 
@@ -196,7 +196,6 @@ function logup() {
   <div style="text-align: center; margin-top: 16px;">
     <h3>{{ name }}</h3>
     <p>{{ role }}</p>
-
   </div>
   <mdui-dialog close-on-overlay-click class="log-in">
     <mdui-top-app-bar slot="header">

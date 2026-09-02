@@ -2,6 +2,7 @@
 import 'mdui/components/card.js';
 import Post from '../components/Post.vue'
 import axios from 'axios';
+import router from '../router/index.js'
 import { ref, onMounted } from 'vue';
 const posts = ref([]);
 
@@ -10,6 +11,10 @@ onMounted(() => {
     posts.value = response.data.data.items;
   });
 });
+
+function toPostDetail(postId) {
+  router.push(`/postDetail/${postId}`);
+}
 </script>
 <template>
 
@@ -17,15 +22,19 @@ onMounted(() => {
 
   <div class="head-grid">
     <mdui-card style="width: 100%; height: 300px; padding:16px;background: rgb(var(--mdui-color-surface-container)); ">
-      <div class="head-title">
-        <p class="home-title">精弘网络</p>
+      <div class="head-title" style="flex-direction: column;">
+        <div style="display: flex">
+          <p class="home-title" style="color: #6750A4;">精弘</p>
+          <p class="home-title">网络</p>
+        </div>
+        <p class="home-title">取精用弘</p>
       </div>
     </mdui-card>
     <mdui-card class="head-line" style="width: 100%; height: 300px; padding:16px;">
       <div class="head-title">
 
         <img src="../assets/add.jpg" style="width: 160px;height: 200px;">
-        <p style="margin-left: 16px;font-size: 24px;">在这里，遇见自己~</p>
+        <p style="margin-left: 16px;font-size: 20px;">在这里，遇见技术部~</p>
       </div>
 
 
@@ -34,7 +43,8 @@ onMounted(() => {
 
 
   <div class="home-titlecontainer">
-    <Post v-for="post in posts" :key="post.id" :content="post.content" :likes="post.like_count" :comments="post.comment_count" />
+    <Post v-for="post in posts" :key="post.id" :content="post.content" :likes="post.like_count"
+      :comments="post.comment_count" :postId="post.id" />
   </div>
 </template>
 <style scoped>
