@@ -2,6 +2,7 @@
 import 'mdui/components/text-field.js';
 import axios from 'axios';
 import 'mdui/components/dialog.js';
+import router from '../router/index.js'
 // 动态创建弹窗
 function dynamicCreateDialog(content) {
   const dialog = document.createElement("mdui-dialog");
@@ -12,9 +13,9 @@ function dynamicCreateDialog(content) {
   dialog.open = true;
 }
 function submit(){
-    const content = document.querySelector('.content').value;
+    const content = document.querySelector('.post-content').value;
     const access_token = localStorage.getItem('access_token');
-    axios.post('/api/v1/post', {
+    axios.post('/api/v1/posts', {
         content
     }, {
         headers: {
@@ -23,19 +24,20 @@ function submit(){
     })
     .then((response) => {
         if (response.data.code === 0) {
-            document.querySelector('.content').value = '';
+            document.querySelector('.post-content').value = '';
             dynamicCreateDialog('发布成功！');
-        } else dynamicCreateDialog('发布失败！' + (response.data.message || ''));
+            router.push('/');
+        } else dynamicCreateDialog('发布失败！' + (response.data.msg || response.data.message || ''));
     })
     .catch((error) => {
-        dynamicCreateDialog('发布失败！原因：' + (error.response?.data?.message || ''));
+        dynamicCreateDialog('发布失败！原因：' + (error.response?.data?.msg || error.response?.data?.message || error.message));
     });
 }
 </script>
 
 <template>
-<div style="padding: 32px;margin-top: 8px; text-align: right;">
-    <mdui-text-field class="content" label="请输入文章内容" style="width: 100%;  margin-top: 8px;" rows="20"></mdui-text-field>
-    <mdui-button style="margin-top: 16px;" @click="submit" >提交</mdui-button>
+<div style="padding: 32px;margin-top: 8px; text-align: center;">
+    <mdui-text-field class="post-content" label="请输入文章内容" style="width: 100%;  margin-top: 8px;" rows="25"></mdui-text-field>
+    <mdui-button style="margin-top: 16px;width: 120px;" @click="submit" >提交</mdui-button>
 </div>
 </template>
