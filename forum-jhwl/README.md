@@ -10,6 +10,6 @@
 - 大致沿用 Google 的 `Material Design 3` 设计规范
 - 伸缩响应性布局（同时支持`移动端`以及`PC`端）
 
-# 感谢以下项目的支持
+# 感谢以下开源项目的支持
 - [MDUI](https://github.com/zdhxiong/mdui)
 - [Vue 3](https://github.com/vuejs/)

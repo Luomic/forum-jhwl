@@ -9,7 +9,7 @@ import 'mdui/components/text-field.js';
 import axios from 'axios';
 
 
-const isLoggedIn = ref(false); // 这是登录状态
+const isShowLog = ref(true); // 这是登录状态
 const role = ref(localStorage.getItem('role') || ''); // 获取用户角色
 const name = ref('');
 
@@ -18,7 +18,10 @@ const name = ref('');
 
 onMounted(() => {
   const hasAccessToken = !!localStorage.getItem('access_token');
-  if (!hasAccessToken) return;
+  if (!hasAccessToken) {
+    isShowLog.value = false;
+    return;
+  }
 
   const username = localStorage.getItem('username');
   const password = localStorage.getItem('password');
@@ -31,8 +34,9 @@ onMounted(() => {
         // 刷新持久化token
         localStorage.setItem('access_token', response.data.data.access_token);
         localStorage.setItem('role', response.data.data.user.role);
+        role.value = response.data.data.user.role;
         name.value = response.data.data.user.name;
-        isLoggedIn.value = true;
+        isShowLog.value = true;
       } else {
         console.log('自动登录失败');
         // 清除无效的 token
@@ -63,7 +67,8 @@ function autoLogFromUp(username, password) {
         localStorage.setItem('password', password);
         localStorage.setItem('role', response.data.data.user.role);
         name.value = response.data.data.user.name;
-        isLoggedIn.value = true;
+        role.value = response.data.data.user.role;
+        isShowLog.value = true;
       } else {
         console.log('自动登录失败');
         // 清除无效的 token
@@ -116,12 +121,13 @@ function login() {
       console.log('登录响应:', response.data);
       if (response.data.code === 0) {
         console.log('登录成功');
-        isLoggedIn.value = true; // 切换为已登录状态，隐藏登录/注册按钮
+        isShowLog.value = true; 
         // 持久化token
         localStorage.setItem('username', username);
         localStorage.setItem('password', password);
         localStorage.setItem('access_token', response.data.data.access_token);
         localStorage.setItem('role', response.data.data.user.role);
+        role.value = response.data.data.user.role;
         name.value = response.data.data.user.name;
         closeDialogLog();
 
@@ -182,7 +188,7 @@ function logup() {
 
 
   <!--未登录显示以下布局-->
-  <div v-if="!isLoggedIn" style="text-align: center;margin-top: 22px;" class="no-account">
+  <div v-if="!isShowLog" style="text-align: center;margin-top: 22px;" class="no-account">
     <mdui-button @click="openDialogLog">登录</mdui-button>
     <mdui-button style="margin-left: 16px;" @click="openDialogUp">注册</mdui-button>
   </div>

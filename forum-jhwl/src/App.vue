@@ -11,11 +11,34 @@ import 'mdui/components/top-app-bar.js';
 import 'mdui/components/top-app-bar-title.js';
 import 'mdui/components/text-field.js';
 import Post from './components/Post.vue'
+import router from './router/index.js'
+
+const isLogin = localStorage.getItem('access_token') == null ? false : true;
 
 function openDialog() {
   const dialog = document.querySelector(".example-header");
   dialog.open = true;
 }
+
+// 跳转到编辑页面
+function toEditPage() {
+  const hasLogin = !!localStorage.getItem('access_token');
+
+  if (hasLogin) router.push('/editPage');
+  else dynamicCreateDialog("请先登录！");
+  
+}
+
+// 动态创建弹窗
+function dynamicCreateDialog(content) {
+  const dialog = document.createElement("mdui-dialog");
+  dialog.classList.add("example-header");
+  dialog.innerHTML =  content;
+  dialog.closeOnOverlayClick = true;
+  document.body.appendChild(dialog);
+  dialog.open = true;
+}
+
 </script>
 
 <template>
@@ -34,7 +57,7 @@ function openDialog() {
 
 
         <mdui-fab lowered icon="search" slot="top" class="edit-post"></mdui-fab>
-        <mdui-fab lowered icon="edit" slot="bottom" class="edit-post" style="margin-bottom: 20px;" @click="openDialog"></mdui-fab>
+        <mdui-fab lowered icon="edit" slot="bottom" class="edit-post" style="margin-bottom: 20px;" @click="toEditPage"></mdui-fab>
         <!-- 暗色模式 -->
         <mdui-button-icon icon="dark_mode--outlined" slot="bottom" class="dark-mode"></mdui-button-icon>
 
@@ -63,8 +86,7 @@ function openDialog() {
 
 
     <mdui-navigation-bar class="mobile-nav" value="post" scroll-behavior="hide" scroll-threshold="30" scroll-target=".content">
-      <mdui-navigation-bar-item icon="inbox--outlined" active-icon="inbox" value="post" :active="$route.path === '/'"
-        @click="$router.push('/')">
+      <mdui-navigation-bar-item icon="inbox--outlined" active-icon="inbox" value="post" :active="$route.path === '/'" @click="$router.push('/')">
         帖子
       </mdui-navigation-bar-item>
 
