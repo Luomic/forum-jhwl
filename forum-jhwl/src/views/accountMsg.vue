@@ -11,7 +11,11 @@ import axios from 'axios';
 
 const isLoggedIn = ref(false); // 这是登录状态
 const role = ref(localStorage.getItem('role') || ''); // 获取用户角色
-// 初始化时的自动登录（须在 DOM 挂载后再执行）
+const name = ref('');
+
+
+
+
 onMounted(() => {
   const hasAccessToken = !!localStorage.getItem('access_token');
   if (!hasAccessToken) return;
@@ -27,6 +31,7 @@ onMounted(() => {
         // 刷新持久化token
         localStorage.setItem('access_token', response.data.data.access_token);
         localStorage.setItem('role', response.data.data.user.role);
+        name.value = response.data.data.user.name;
         isLoggedIn.value = true;
       } else {
         console.log('自动登录失败');
@@ -57,6 +62,7 @@ function autoLogFromUp(username, password) {
         localStorage.setItem('username', username);
         localStorage.setItem('password', password);
         localStorage.setItem('role', response.data.data.user.role);
+        name.value = response.data.data.user.name;
         isLoggedIn.value = true;
       } else {
         console.log('自动登录失败');
@@ -116,6 +122,7 @@ function login() {
         localStorage.setItem('password', password);
         localStorage.setItem('access_token', response.data.data.access_token);
         localStorage.setItem('role', response.data.data.user.role);
+        name.value = response.data.data.user.name;
         closeDialogLog();
 
       } else {
@@ -135,9 +142,6 @@ function logup() {
   const username = document.querySelector('.account-logup').value;
   const name = document.querySelector('.username-logup').value;
   const password = document.querySelector('.password-logup').value;
-  console.log('学号:', username);
-  console.log('姓名:', name);
-  console.log('密码:', password);
 
   const errorElement = document.querySelector('.log-up p');
   errorElement.textContent = '';
@@ -184,7 +188,7 @@ function logup() {
   </div>
   <!--已登录显示-->
   <div style="text-align: center; margin-top: 16px;">
-    <h3>昵称-123</h3>
+    <h3>{{ name }}</h3>
     <p>{{ role }}</p>
 
   </div>

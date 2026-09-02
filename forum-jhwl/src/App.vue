@@ -62,7 +62,7 @@ function openDialog() {
     <mdui-fab class="mobile-fab" icon="edit"></mdui-fab>
 
 
-    <mdui-navigation-bar class="mobile-nav" value="post">
+    <mdui-navigation-bar class="mobile-nav" value="post" scroll-behavior="hide" scroll-threshold="30" scroll-target=".content">
       <mdui-navigation-bar-item icon="inbox--outlined" active-icon="inbox" value="post" :active="$route.path === '/'"
         @click="$router.push('/')">
         帖子
