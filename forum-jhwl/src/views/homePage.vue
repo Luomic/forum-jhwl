@@ -4,13 +4,61 @@ import Post from '../components/Post.vue'
 import axios from 'axios';
 import router from '../router/index.js'
 import { ref, onMounted } from 'vue';
-const posts = ref([]);
 
-onMounted(() => {
-  axios.get('/api/v1/posts').then((response) => {
-    posts.value = response.data.data.items;
-  });
-});
+
+
+const posts = ref([]);
+const likedPosts = ref([]);
+const hasLiked = ref([]);
+
+
+
+async function getLikedPosts() {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    dynamicCreateDialog("请先登录", () => router.push('/accountMsg'));
+    return;
+  }
+  try {
+    // 接口要求 post_ids 是纯数字 id 数组，不能直接把 posts(ref) 传过去
+    const response = await axios.post('/api/v1/posts/likes', {
+      post_ids: posts.value.map(p => p.id)
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    // 接口契约：data.status: [{ post_id, liked }]
+    const status = response.data?.data?.status ?? [];
+    hasLiked.value = status.filter(item => item.liked).map(item => item.post_id);
+  } catch (error) {
+    console.error('获取点赞状态失败：', error);
+  }
+}
+
+function dynamicCreateDialog(content, onClosed) {
+	const dialog = document.createElement("mdui-dialog");
+	dialog.classList.add("example-header");
+	dialog.innerHTML = content;
+	dialog.closeOnOverlayClick = true;
+	document.body.appendChild(dialog);
+	
+	dialog.addEventListener("closed", () => {
+		dialog.remove(); 
+		if (onClosed) onClosed();
+	});
+	dialog.open = true;
+}
+
+
+async function fetchPosts() {
+  const response = await axios.get('/api/v1/posts');
+  posts.value = response.data.data.items;
+  // 获取已点赞的帖子列表
+  getLikedPosts();
+}
+
+onMounted(fetchPosts);
 
 function toPostDetail(postId) {
   router.push(`/postDetail/${postId}`);
@@ -44,7 +92,9 @@ function toPostDetail(postId) {
 
   <div class="home-titlecontainer">
     <Post v-for="post in posts" :key="post.id" :content="post.content" :likes="post.like_count"
-      :comments="post.comment_count" :postId="post.id" />
+      :comments="post.comment_count" :postId="post.id" :postUserId="post.author.username" :role="post.author.role"
+      :likedPosts="hasLiked"
+      @deleted="fetchPosts" />
   </div>
 </template>
 <style scoped>

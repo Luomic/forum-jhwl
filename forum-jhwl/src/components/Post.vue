@@ -2,41 +2,77 @@
 import 'mdui/components/dialog.js';
 import router from '../router/index.js'
 import axios from 'axios';
+import { ref } from 'vue';
 
-// 动态创建弹窗
-function dynamicCreateDialog(content) {
+
+function dynamicCreateDialog(content, onClosed) {
 	const dialog = document.createElement("mdui-dialog");
 	dialog.classList.add("example-header");
 	dialog.innerHTML = content;
 	dialog.closeOnOverlayClick = true;
 	document.body.appendChild(dialog);
+
+	dialog.addEventListener("closed", () => {
+		dialog.remove(); 
+		if (onClosed) onClosed();
+	});
 	dialog.open = true;
 }
 
-function likePost(postId) {
-	dynamicCreateDialog(`/api/v1/posts/${postId}/like`);
+function isDeleted(){
+	if (String(props.postUserId) === localStorage.getItem('username') || props.role === 'admin') return true;
+	else return false;
+
+}
+function deletePost(postId) {
 	const hasLogin = !!localStorage.getItem('access_token');
 
 	if (hasLogin) {
-		axios.post(`/api/v1/posts/${postId}/like`, {}, {
+		axios.delete(`/api/v1/posts/${postId}`, {
 			headers: {
 				'Authorization': `Bearer ${localStorage.getItem('access_token')}`
 			}
 		})
 			.then(response => {
-				router.push('/');
-				dynamicCreateDialog("点赞成功");
-				document.querySelector(".like-button").icon = "thumb_up";
+				// 重新拉取列表
+				dynamicCreateDialog("删除成功", () => emit('deleted'));
 			})
 			.catch(error => {
-				dynamicCreateDialog("点赞失败");
+				dynamicCreateDialog("删除失败");
 			});
 	} else {
 		dynamicCreateDialog("请先登录");
 	}
 }
+function likePost(postId) {
+	const token = localStorage.getItem('access_token');
+	if (!token) {
+		dynamicCreateDialog("请先登录", () => router.push('/accountMsg'));
+		return;
+	}
+	axios.post(`/api/v1/posts/${postId}/like`, {}, {
+		headers: {
+			'Authorization': `Bearer ${token}`
+		}
+	})
+		.then(response => {
+			const wasLiked = props.likedPosts.includes(postId);
+			dynamicCreateDialog(wasLiked ? "取消点赞成功" : "点赞成功", () => emit('deleted'));
+		})
+		.catch(error => {
+			console.error('点赞请求失败：', error.response?.data ?? error);
+			const status = error.response?.status;
+			if (status === 401) {
+				// token 失效/过期：清掉让用户重新登录
+				localStorage.removeItem('access_token');
+				dynamicCreateDialog("登录已失效，请重新登录", () => router.push('/accountMsg'));
+			} else {
+				dynamicCreateDialog("点赞失败：" + (error.response?.data?.msg || error.message));
+			}
+		});
+}
 
-defineProps({
+const props = defineProps({
 	content: {
 		type: String,
 		default: '帖子内容'
@@ -52,8 +88,22 @@ defineProps({
 	postId: {
 		type: Number,
 		default: 0
+	},
+	postUserId: {
+		type: Number,
+		default: 0
+	},
+	role: {
+		type: String,
+		default: ''
+	},
+	likedPosts: {
+		type: Array,
+		default: () => []
 	}
 })
+
+const emit = defineEmits(['deleted'])
 </script>
 
 
@@ -64,7 +114,7 @@ defineProps({
 			<div class="ops">
 				<!--点赞·-->
 				<div style="display: flex; align-items: center; margin-right: 16px;margin-top: 16px;">
-					<mdui-button-icon icon="thumb_up--outlined" @click="likePost(postId)"
+					<mdui-button-icon :icon="likedPosts.includes(postId) ? 'thumb_up' : 'thumb_up--outlined'" @click="likePost(postId)"
 						class="like-button"></mdui-button-icon>
 					<p>{{ likes }}</p>
 				</div>
@@ -73,9 +123,13 @@ defineProps({
 					<mdui-button-icon icon="comment--outlined"></mdui-button-icon>
 					<p>{{ comments }}</p>
 				</div>
-				<div style="display: flex; align-items: center;margin-top: 16px;">
-					<mdui-button-icon icon="delete--outlined"></mdui-button-icon>
-				</div>
+			<div v-if="isDeleted()" style="display: flex;align-items: center;margin-top: 16px;">
+				<mdui-button-icon icon="delete--outlined" @click="deletePost(postId)"></mdui-button-icon>
+			</div>
+
+				<!--以下组件仅在传参可用（判断是否为自己）-->
+				<div style="display: none;">{{ postUserId }}</div>
+
 			</div>
 		</div>
 	</mdui-card>
