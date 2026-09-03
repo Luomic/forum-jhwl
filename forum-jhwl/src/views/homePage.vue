@@ -3,17 +3,16 @@ import 'mdui/components/card.js';
 import Post from '../components/Post.vue'
 import axios from 'axios';
 import router from '../router/index.js'
-import { ref, onMounted } from 'vue';
-
-
+import { ref, onMounted, onUnmounted } from 'vue';
 
 const posts = ref([]);
-const likedPosts = ref([]);
 const hasLiked = ref([]);
+const page = ref(1);
+const pageSize = 20;
+const total = ref(0);
+const loading = ref(false);
 
-
-
-async function getLikedPosts() {
+async function getLikedPosts(newPosts) {
   const token = localStorage.getItem('access_token');
   if (!token) {
     dynamicCreateDialog("请先登录", () => router.push('/accountMsg'));
@@ -21,14 +20,14 @@ async function getLikedPosts() {
   }
   try {
     const response = await axios.post('/api/v1/posts/likes', {
-      post_ids: posts.value.map(p => p.id)
+      post_ids: newPosts.map(p => p.id)
     }, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
     const status = response.data?.data?.status ?? [];
-    hasLiked.value = status.filter(item => item.liked).map(item => item.post_id);
+    hasLiked.value = [...hasLiked.value, ...status.filter(item => item.liked).map(item => item.post_id)];
   } catch (error) {
     console.error('获取点赞状态失败：', error);
   }
@@ -40,30 +39,61 @@ function dynamicCreateDialog(content, onClosed) {
 	dialog.innerHTML = content;
 	dialog.closeOnOverlayClick = true;
 	document.body.appendChild(dialog);
-	
+
 	dialog.addEventListener("closed", () => {
-		dialog.remove(); 
+		dialog.remove();
 		if (onClosed) onClosed();
 	});
 	dialog.open = true;
 }
 
-
-async function fetchPosts() {
-  const response = await axios.get('/api/v1/posts');
-  posts.value = response.data.data.items;
-  // 获取已点赞的帖子列表
-  getLikedPosts();
+async function fetchPosts(reset = true) {
+  if (loading.value) return;
+  if (!reset) {
+    if (page.value >= total.value) return;
+    page.value++;
+  } else {
+    page.value = 1;
+    hasLiked.value = [];
+  }
+  loading.value = true;
+  try {
+    const response = await axios.get('/api/v1/posts', {
+      params: { page: page.value, page_size: pageSize }
+    });
+    const { items, meta } = response.data.data;
+    posts.value = reset ? items : [...posts.value, ...items];
+    total.value = meta.total;
+    getLikedPosts(items);
+  } catch (error) {
+    if (!reset) page.value--;
+    console.error('获取帖子失败：', error);
+  } finally {
+    loading.value = false;
+  }
 }
 
-onMounted(fetchPosts);
+let scrollEl = null;
+
+function onScroll() {
+  if (loading.value) return;
+  if (scrollEl.scrollTop + scrollEl.clientHeight >= scrollEl.scrollHeight - 200) {
+    fetchPosts(false);
+  }
+}
+
+onMounted(() => {
+  fetchPosts();
+  scrollEl = document.querySelector('.content');
+  scrollEl.addEventListener('scroll', onScroll);
+});
+onUnmounted(() => scrollEl?.removeEventListener('scroll', onScroll));
 
 function toPostDetail(postId) {
   router.push(`/postDetail/${postId}`);
 }
 </script>
 <template>
-
 
 
   <div class="head-grid">
@@ -87,13 +117,15 @@ function toPostDetail(postId) {
     </mdui-card>
   </div>
 
-
   <div class="home-titlecontainer">
     <Post v-for="post in posts" :key="post.id" :content="post.content" :likes="post.like_count"
       :comments="post.comment_count" :postId="post.id" :postUserId="post.author.username" :role="post.author.role"
       :likedPosts="hasLiked"
       @deleted="fetchPosts" />
   </div>
+
+  <p v-if="loading" style="text-align:center;color:gray;margin:12px 0;">加载中...</p>
+  <p v-else-if="posts.length > 0 && page >= total" style="text-align:center;color:gray;margin:12px 0;">没有更多了</p>
 </template>
 <style scoped>
 .home-titlecontainer {
