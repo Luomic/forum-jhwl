@@ -62,7 +62,7 @@ function dynamicCreateDialog(content) {
         
 
         <!-- 喜欢 -->
-        <mdui-tooltip content="我的点赞" slot="bottom" class="favorite">
+        <mdui-tooltip content="支持一下" slot="bottom" class="favorite">
           <mdui-button-icon icon="favorite"></mdui-button-icon>
         </mdui-tooltip>
 

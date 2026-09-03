@@ -20,7 +20,6 @@ async function getLikedPosts() {
     return;
   }
   try {
-    // 接口要求 post_ids 是纯数字 id 数组，不能直接把 posts(ref) 传过去
     const response = await axios.post('/api/v1/posts/likes', {
       post_ids: posts.value.map(p => p.id)
     }, {
@@ -28,7 +27,6 @@ async function getLikedPosts() {
         'Authorization': `Bearer ${token}`
       }
     });
-    // 接口契约：data.status: [{ post_id, liked }]
     const status = response.data?.data?.status ?? [];
     hasLiked.value = status.filter(item => item.liked).map(item => item.post_id);
   } catch (error) {

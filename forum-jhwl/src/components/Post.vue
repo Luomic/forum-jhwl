@@ -110,7 +110,7 @@ const emit = defineEmits(['deleted'])
 <template>
 	<mdui-card class="home-card" style="padding: 16px;">
 		<div class="card-body">
-			<p class="post-content">{{ content }}</p>
+			<p class="post-content" @click="$router.push(`/postDetail/${postId}`)">{{ content }}</p>
 			<div class="ops">
 				<!--点赞·-->
 				<div style="display: flex; align-items: center; margin-right: 16px;margin-top: 16px;">
@@ -120,7 +120,7 @@ const emit = defineEmits(['deleted'])
 				</div>
 				<!--评论-->
 				<div style="display: flex; align-items: center;margin-right: 16px;margin-top: 16px;">
-					<mdui-button-icon icon="comment--outlined"></mdui-button-icon>
+					<mdui-button-icon icon="comment--outlined" @click="$router.push(`/postDetail/${postId}`)"></mdui-button-icon>
 					<p>{{ comments }}</p>
 				</div>
 			<div v-if="isDeleted()" style="display: flex;align-items: center;margin-top: 16px;">

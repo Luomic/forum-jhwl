@@ -24,7 +24,6 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // 开发环境代理：/api 开头的请求转发到后端，避免跨域
       '/api': {
         target: 'http://118.196.72.238:8081',
         changeOrigin: true,
