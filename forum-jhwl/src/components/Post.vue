@@ -20,7 +20,7 @@ function dynamicCreateDialog(content, onClosed) {
 }
 
 function isDeleted(){
-	if (String(props.postUserId) === localStorage.getItem('username') || props.role === 'admin') return true;
+	if (String(props.postUserId) === localStorage.getItem('username') || localStorage.getItem('role') === 'admin') return true;
 	else return false;
 
 }
